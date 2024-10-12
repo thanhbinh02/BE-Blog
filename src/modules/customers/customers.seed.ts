@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CustomerService } from './customer.service';
+import { CustomerService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { CustomerGender } from './enum/customer.enum';
 
 @Injectable()
-export class CustomerSeeder {
+export class CustomersSeeder {
   constructor(private readonly customerService: CustomerService) {}
 
   async seed() {

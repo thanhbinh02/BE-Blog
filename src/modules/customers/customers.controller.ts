@@ -11,7 +11,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { CustomerService } from './customer.service';
+import { CustomerService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 
 import { Customer } from './interface/customer.interface';
@@ -24,7 +24,7 @@ import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('customers')
 @Controller('customers')
-export class CustomerController {
+export class CustomersController {
   constructor(private customerService: CustomerService) {}
 
   @Get()

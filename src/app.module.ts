@@ -1,8 +1,8 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CustomerModule } from './modules/customers/customer.module';
-import { CustomerSeeder } from './modules/customers/customer.seed';
+import { CustomersModule } from './modules/customers/customers.module';
+import { CustomersSeeder } from './modules/customers/customers.seed';
 
 @Module({
   imports: [
@@ -25,14 +25,14 @@ import { CustomerSeeder } from './modules/customers/customer.seed';
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
       }),
     }),
-    CustomerModule,
+    CustomersModule,
   ],
-  providers: [CustomerSeeder],
+  providers: [CustomersSeeder],
 })
 export class AppModule implements OnModuleInit {
-  constructor(private readonly customerSeeder: CustomerSeeder) {}
+  constructor(private readonly CustomersSeeder: CustomersSeeder) {}
 
   async onModuleInit() {
-    await this.customerSeeder.seed();
+    await this.CustomersSeeder.seed();
   }
 }
