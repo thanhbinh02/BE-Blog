@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { PostModule } from './post/post.module';
 import { UserSeeder } from './user/user.seed';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UserSeeder } from './user/user.seed';
     AuthModule,
     UserModule,
     PostModule,
+    CategoryModule,
   ],
   providers: [UserSeeder],
 })
