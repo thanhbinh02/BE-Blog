@@ -15,10 +15,11 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('eCommerce example')
-    .setDescription('The eCommerce API description')
+    .setTitle('Blog example')
+    .setDescription('The Blog API description')
     .setVersion('1.0')
-    .addTag('eCommerce')
+    .addBearerAuth()
+    .addTag('Blog')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
