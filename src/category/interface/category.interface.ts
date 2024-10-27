@@ -1,8 +1,5 @@
-export interface ICategory {
-  id: number;
-  parentCategoryId: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-  creatorId: number;
-}
+import { CategoryEntity } from '../category.entity';
+
+export type TCategoryDetails = Omit<CategoryEntity, 'parentCategories'> & {
+  parentCategories: { id: number; name: string }[];
+};
