@@ -1,3 +1,4 @@
+import { CategoryEntity } from 'src/category/category.entity';
 import { User } from 'src/user/user.entity';
 import {
   Entity,
@@ -29,4 +30,10 @@ export class PostEntity {
   @ManyToOne(() => User, (user) => user.posts)
   @JoinColumn({ name: 'creatorId' })
   creator: User;
+
+  @ManyToOne(() => CategoryEntity, (category) => category.posts, {
+    nullable: false,
+  })
+  @JoinColumn({ name: 'categoryId' })
+  category: CategoryEntity;
 }
