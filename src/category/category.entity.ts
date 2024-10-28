@@ -12,6 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CategoryLevel } from './enum/category.enum';
+import { PostEntity } from 'src/post/post.entity';
 
 @Entity('category')
 export class CategoryEntity {
@@ -52,4 +53,7 @@ export class CategoryEntity {
   @ManyToOne(() => User, (user) => user.posts)
   @JoinColumn({ name: 'creatorId' })
   creator: User;
+
+  @OneToMany(() => PostEntity, (post) => post.category)
+  posts: PostEntity[];
 }

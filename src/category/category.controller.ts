@@ -35,6 +35,7 @@ import { FilterCategoryDto } from './dto/filter-category.dto';
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
+  @UseGuards(AuthGuard)
   @Get()
   @ApiBearerAuth()
   @ApiQuery({
@@ -102,6 +103,7 @@ export class CategoryController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: 'Get customer details',
@@ -135,7 +137,9 @@ export class CategoryController {
     return this.categoryService.findId(id);
   }
 
+  @UseGuards(AuthGuard)
   @Put(':id')
+  @ApiBearerAuth()
   @ApiBody({
     description: 'Update category',
     schema: {
