@@ -1,4 +1,5 @@
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class FilterCategoryDto {
   @IsOptional()
@@ -15,5 +16,6 @@ export class FilterCategoryDto {
 
   @IsOptional()
   @IsBoolean()
+  @Transform(({ value }) => value === 'true')
   getFull?: boolean;
 }

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 
 import { User } from 'src/user/user.entity';
 import { CategoryEntity } from './category.entity';
@@ -9,6 +9,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryLevel } from './enum/category.enum';
 import { TCategoryDetails } from './interface/category.interface';
 import { FilterCategoryDto } from './dto/filter-category.dto';
+import { ListData } from 'src/types';
 
 @Injectable()
 export class CategoryService {
@@ -20,26 +21,51 @@ export class CategoryService {
 
   async findAllAndCount(
     filter: FilterCategoryDto,
-  ): Promise<[CategoryEntity[], number]> {
-    const { page = '1', perPage = '10', name, getFull } = filter;
+  ): Promise<ListData<CategoryEntity>> {
+    const page = Number(filter.page) || 1;
+    const perPage = Number(filter.perPage) || 10;
+    const name = filter?.name?.trim() || '';
+    const skip = (page - 1) * perPage;
 
-    const skip = (parseInt(page) - 1) * parseInt(perPage);
-    const take = parseInt(perPage);
+    const whereConditions = name ? [{ name: Like(`%${name}%`) }] : [];
 
-    const queryBuilder = this.categoryRepository.createQueryBuilder('category');
+    const totalCount = await this.categoryRepository.count({
+      where: whereConditions,
+    });
 
-    if (name) {
-      queryBuilder.andWhere('category.name LIKE :name', { name: `%${name}%` });
-    }
+    const getFull = String(filter.getFull) === 'true';
 
-    if (getFull) {
-      // Apply additional criteria if `getFull` is true
-    }
+    const [res, total] = await this.categoryRepository.findAndCount({
+      where: whereConditions,
+      order: { createdAt: 'DESC' },
+      take: getFull ? totalCount : perPage,
+      skip: getFull ? 0 : skip,
+      relations: ['creator', 'parentCategories'],
+      select: {
+        id: true,
+        name: true,
+        level: true,
+        createdAt: true,
+        updatedAt: true,
+        creator: {
+          id: true,
+          fullName: true,
+        },
+        parentCategories: {
+          id: true,
+          name: true,
+        },
+      },
+    });
 
-    queryBuilder.skip(skip).take(take);
-
-    return queryBuilder.getManyAndCount();
+    return {
+      list: res,
+      total,
+      page,
+      perPage,
+    };
   }
+
   async create(
     createCategoryDto: CreateCategoryDto,
     creatorId: number,

@@ -64,12 +64,7 @@ export class CategoryController {
   async findAll(
     @Query() filter: FilterCategoryDto,
   ): Promise<ListData<CategoryEntity>> {
-    const [categories, total] =
-      await this.categoryService.findAllAndCount(filter);
-    return {
-      list: categories,
-      total,
-    };
+    return this.categoryService.findAllAndCount(filter);
   }
 
   @UseGuards(AuthGuard)
