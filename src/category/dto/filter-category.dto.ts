@@ -1,14 +1,17 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
+import { CategoryLevel } from '../enum/category.enum';
 
 export class FilterCategoryDto {
   @IsOptional()
-  @IsString()
-  page?: string;
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
+  page?: number;
 
   @IsOptional()
-  @IsString()
-  perPage?: string;
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
+  perPage?: number;
 
   @IsOptional()
   @IsString()
@@ -18,4 +21,21 @@ export class FilterCategoryDto {
   @IsBoolean()
   @Transform(({ value }) => value === 'true')
   getFull?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
+  level?: CategoryLevel;
+
+  @IsOptional()
+  @IsString()
+  parentName?: string;
+
+  @IsOptional()
+  @IsString()
+  createdAtFrom?: string;
+
+  @IsOptional()
+  @IsString()
+  createdAtTo?: string;
 }

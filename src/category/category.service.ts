@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Like, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
+import { ListData } from 'src/types';
 import { User } from 'src/user/user.entity';
 import { CategoryEntity } from './category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { FilterCategoryDto } from './dto/filter-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryLevel } from './enum/category.enum';
 import { TCategoryDetails } from './interface/category.interface';
-import { FilterCategoryDto } from './dto/filter-category.dto';
-import { ListData } from 'src/types';
 
 @Injectable()
 export class CategoryService {
@@ -22,45 +22,64 @@ export class CategoryService {
   async findAllAndCount(
     filter: FilterCategoryDto,
   ): Promise<ListData<CategoryEntity>> {
-    const page = Number(filter.page) || 1;
-    const perPage = Number(filter.perPage) || 10;
-    const name = filter?.name?.trim() || '';
+    const {
+      page = 1,
+      perPage = 10,
+      getFull,
+      name,
+      parentName,
+      level,
+      createdAtFrom,
+      createdAtTo,
+    } = filter;
+
     const skip = (page - 1) * perPage;
 
-    const whereConditions = name ? [{ name: Like(`%${name}%`) }] : [];
+    const queryBuilder = this.categoryRepository
+      .createQueryBuilder('category')
+      .leftJoinAndSelect('category.creator', 'creator')
+      .leftJoinAndSelect('category.parentCategories', 'parentCategory')
+      .orderBy('category.createdAt', 'DESC');
 
-    const totalCount = await this.categoryRepository.count({
-      where: whereConditions,
-    });
+    if (name) {
+      queryBuilder.andWhere('category.name LIKE :name', {
+        name: `%${name.trim()}%`,
+      });
+    }
 
-    const getFull = String(filter.getFull) === 'true';
+    if (level && level in CategoryLevel) {
+      queryBuilder.andWhere('category.level = :level', { level });
+    }
 
-    const [res, total] = await this.categoryRepository.findAndCount({
-      where: whereConditions,
-      order: { createdAt: 'DESC' },
-      take: getFull ? totalCount : perPage,
-      skip: getFull ? 0 : skip,
-      relations: ['creator', 'parentCategories'],
-      select: {
-        id: true,
-        name: true,
-        level: true,
-        createdAt: true,
-        updatedAt: true,
-        creator: {
-          id: true,
-          fullName: true,
-        },
-        parentCategories: {
-          id: true,
-          name: true,
-        },
-      },
-    });
+    if (parentName) {
+      queryBuilder.andWhere('parentCategory.name LIKE :parentName', {
+        parentName: `%${parentName.trim()}%`,
+      });
+    }
+
+    if (createdAtFrom) {
+      queryBuilder.andWhere('category.createdAt >= :createdAtFrom', {
+        createdAtFrom: `${createdAtFrom} 00:00:00`,
+      });
+    }
+
+    if (createdAtTo) {
+      queryBuilder.andWhere('category.createdAt <= :createdAtTo', {
+        createdAtTo: `${createdAtTo} 23:59:59`,
+      });
+    }
+
+    const totalCount = await queryBuilder.getCount();
+
+    if (!getFull) {
+      queryBuilder.skip(skip).take(perPage);
+    }
+
+    const [res] = await queryBuilder.getManyAndCount();
 
     return {
       list: res,
-      total,
+      total: totalCount,
       page,
       perPage,
     };

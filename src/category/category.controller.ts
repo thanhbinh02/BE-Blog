@@ -29,6 +29,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { TCategoryDetails } from './interface/category.interface';
 import { FilterCategoryDto } from './dto/filter-category.dto';
+import { CategoryLevel } from './enum/category.enum';
 
 @ApiTags('Categories')
 @Controller('categories')
@@ -61,6 +62,26 @@ export class CategoryController {
     required: false,
     type: Boolean,
     description: 'Fetch all categories if true',
+  })
+  @ApiQuery({
+    name: 'createdAtFrom',
+    required: false,
+    type: String,
+    description:
+      'Filter categories created from this date (format: YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'createdAtTo',
+    required: false,
+    type: String,
+    description: 'Filter categories created to this date (format: YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'level',
+    required: false,
+    enum: CategoryLevel,
+    description:
+      'Filter categories by level. Options are: 1 (PARENT), 2 (CHILDREN)',
   })
   async findAll(
     @Query() filter: FilterCategoryDto,
