@@ -40,6 +40,12 @@ export class CategoryController {
   @Get()
   @ApiBearerAuth()
   @ApiQuery({
+    name: 'id',
+    required: false,
+    type: String,
+    description: 'ID of category',
+  })
+  @ApiQuery({
     name: 'page',
     required: false,
     type: String,

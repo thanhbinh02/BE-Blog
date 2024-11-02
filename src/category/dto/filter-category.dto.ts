@@ -6,6 +6,11 @@ export class FilterCategoryDto {
   @IsOptional()
   @IsInt()
   @Transform(({ value }) => parseInt(value, 10))
+  id?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
   page?: number;
 
   @IsOptional()

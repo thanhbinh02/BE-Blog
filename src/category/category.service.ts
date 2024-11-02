@@ -31,6 +31,7 @@ export class CategoryService {
       level,
       createdAtFrom,
       createdAtTo,
+      id,
     } = filter;
 
     const skip = (page - 1) * perPage;
@@ -40,6 +41,10 @@ export class CategoryService {
       .leftJoinAndSelect('category.creator', 'creator')
       .leftJoinAndSelect('category.parentCategories', 'parentCategory')
       .orderBy('category.createdAt', 'DESC');
+
+    if (id) {
+      queryBuilder.andWhere('category.id = :id', { id });
+    }
 
     if (name) {
       queryBuilder.andWhere('category.name LIKE :name', {
@@ -118,6 +123,7 @@ export class CategoryService {
       where: { id },
       relations: ['parentCategories'],
     });
+
     if (!category) {
       throw new NotFoundException(`Category with id ${id} not found`);
     }
@@ -130,6 +136,22 @@ export class CategoryService {
     Object.assign(category, categoryData);
     category.parentCategories =
       await this.getParentCategories(parentCategoryIds);
+
+    if (category.level === CategoryLevel.CHILDREN) {
+      const childCategories = await this.categoryRepository
+        .createQueryBuilder('category')
+        .leftJoinAndSelect('category.parentCategories', 'parent')
+        .where('parent.id = :categoryId', { categoryId: id })
+        .getMany();
+
+      for (const childCategory of childCategories) {
+        childCategory.parentCategories = childCategory.parentCategories.filter(
+          (parent) => parent.id !== id,
+        );
+
+        await this.categoryRepository.save(childCategory);
+      }
+    }
 
     await this.categoryRepository.save(category);
 
